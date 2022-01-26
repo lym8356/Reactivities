@@ -1,13 +1,9 @@
-import { action, makeAutoObservable, makeObservable, observable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import agent from "../API/agent";
 import { Activity } from "../models/activity";
-// import { v4 as uuid } from "uuid";
 
 export default class ActivityStore {
 
-    // title = 'Hello from Mobx!';
-
-    activities: Activity[] = [];
     activityRegistry = new Map<string, Activity>();
     selectedActivity: Activity | undefined = undefined;
     editMode = false;
@@ -15,22 +11,22 @@ export default class ActivityStore {
     loadingInitial = true;
 
     constructor(){
-        // makeObservable(this, {
-        //     title: observable,
-        //     // function needs to bound to a class
-        //     setTitle: action
-        // })
         makeAutoObservable(this)
     }
 
-    // if no bound, use arrow function
-    // setTitle = () => {
-    //     this.title = this.title + '!';
-    // }
-
     get activitiesByDate() {
-        return Array.from(this.activityRegistry.values()).sort((a, b) => 
-        Date.parse(a.date) - Date.parse(b.date));
+        return Array.from(this.activityRegistry.values()).sort((a, b) =>
+            Date.parse(a.date) - Date.parse(b.date));
+    }
+
+    get groupedActivities() {
+        return Object.entries(
+            this.activitiesByDate.reduce((activities, activity) => {
+                const date = activity.date;
+                activities[date] = activities[date] ? [...activities[date], activity] : [activity];
+                return activities;
+            }, {} as {[key: string]: Activity[]})
+        )
     }
 
     loadActivities = async () => {
