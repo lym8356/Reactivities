@@ -1,5 +1,7 @@
+using Application.Core;
 using AutoMapper;
 using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -7,12 +9,20 @@ namespace Application.Activities
 {
     public class Edit
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Activity Activity { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command>
+         public class CommandValidator : AbstractValidator<Command>
+        {
+            public CommandValidator()
+            {
+                RuleFor(x => x.Activity).SetValidator(new ActivityVdalidator());
+            }
+        }
+
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -23,7 +33,7 @@ namespace Application.Activities
             }
 
             // Cancellation token used to capture user actions 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 // get activity from database
                 var activity = await _context.Activities.FindAsync(request.Activity.Id);
@@ -31,14 +41,21 @@ namespace Application.Activities
                 // old way
                 // activity.Title = request.Activity.Title ?? activity.Title;
 
+                if(activity == null) return null;
+
                 // using auto mapper
                 _mapper.Map(request.Activity, activity);
 
+                // changed in lecture 107
                 // save changes
-                await _context.SaveChangesAsync();
+                // await _context.SaveChangesAsync();
+
+                var result = await _context.SaveChangesAsync() > 0;
+
+                if(!result) return Result<Unit>.Failure("Failed to update activity");
 
                 // return nothing 
-                return Unit.Value;
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }
