@@ -1,22 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    // "noImplicitAny": false, // do not need to set parameters type
+    "target": "es5", // target javascript version, es5, es6, es2015 etc
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
+    "allowJs": true, // combine compile javascript 
     "skipLibCheck": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true, // commonjs way to import
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "node", // node and classic, how compiler works
     "resolveJsonModule": true,
-    "isolatedModules": true,
+    "isolatedModules": true,  // treat each file as single module
     "noEmit": true,
     "jsx": "react-jsx"
   },
